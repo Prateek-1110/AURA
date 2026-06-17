@@ -2,8 +2,11 @@ import base64
 import os
 import requests
 from pathlib import Path
+from dotenv import load_dotenv
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+load_dotenv()
+
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL = "google/gemini-2.0-flash-exp:free"
 

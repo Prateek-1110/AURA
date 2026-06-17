@@ -6,8 +6,10 @@ import requests
 from pathlib import Path
 from io import BytesIO
 from PIL import Image
-
-HF_API_TOKEN = os.getenv("HF_API_TOKEN", "")
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
+HF_API_TOKEN =  os.getenv("HF_API_TOKEN")
 PRIMARY_MODEL = "timbrooks/instruct-pix2pix"
 FALLBACK_MODEL = "runwayml/stable-diffusion-v1-5"  # faster cold starts if primary times out
 
