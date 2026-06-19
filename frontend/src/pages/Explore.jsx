@@ -30,6 +30,7 @@ export default function Explore() {
         <div className="flex items-center gap-4">
           {user ? (
             <>
+              <Link to="/profile" className="text-xs text-gray-400 hover:text-charcoal transition">Profile</Link>
               {user.role === "creator" && (
                 <Link to="/creator/dashboard" className="text-xs text-gray-400 hover:text-charcoal transition">Studio</Link>
               )}
@@ -85,7 +86,7 @@ export default function Explore() {
             <p className="text-sm text-gray-400">
               {cityFilter || serviceFilter !== "All"
                 ? "No salons match these filters."
-                : <>No salons yet. <Link to="/register" className="text-burgundy hover:underline">Create one</Link>.</>}
+                : <>No salons yet. <Link to="/register?role=creator&next=/creator/dashboard" className="text-burgundy hover:underline">Create one</Link>.</>}
             </p>
             {(cityFilter || serviceFilter !== "All") && (
               <button

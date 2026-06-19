@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../api/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import SalonSetupForm from "../components/SalonSetupForm";
 
 function scoreColor(score) {
   if (score === null || score === undefined) return "bg-gray-100 text-gray-400";
@@ -22,10 +23,22 @@ function statusBadge(status) {
 
 export default function CreatorDashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [salon, setSalon] = useState(null);
+  const [loadingSalon, setLoadingSalon] = useState(true);
   const [videos, setVideos] = useState([]);
   const [loadingVideos, setLoadingVideos] = useState(true);
 
   useEffect(() => {
+    api.get("/upload/salon/me")
+      .then(({ data }) => setSalon(data))
+      .catch((err) => {
+        if (err.response?.status !== 404) {
+          setSalon(null);
+        }
+      })
+      .finally(() => setLoadingSalon(false));
+
     api.get("/virality/videos")
       .then(({ data }) => setVideos(data))
       .finally(() => setLoadingVideos(false));
@@ -44,6 +57,35 @@ export default function CreatorDashboard() {
           <button onClick={logout} className="text-sm text-gray-400 hover:text-burgundy transition">
             Sign out
           </button>
+        </div>
+
+        <div className="mb-8">
+          {loadingSalon ? (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <div className="h-5 w-40 bg-gray-100 rounded animate-pulse mb-3" />
+              <div className="h-4 w-64 bg-gray-100 rounded animate-pulse" />
+            </div>
+          ) : salon ? (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">Your Salon</p>
+              <h2 className="font-display text-2xl text-charcoal">{salon.name}</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                {salon.neighborhood ? `${salon.neighborhood}, ` : ""}{salon.city}
+              </p>
+              {salon.description && (
+                <p className="text-sm text-gray-500 mt-3 leading-relaxed">{salon.description}</p>
+              )}
+            </div>
+          ) : (
+            <SalonSetupForm
+              heading="Create your salon"
+              description="This unlocks transformation and video uploads for your creator account."
+              onCreated={(data) => {
+                setSalon(data);
+                navigate("/profile");
+              }}
+            />
+          )}
         </div>
 
         {/* Quick actions */}

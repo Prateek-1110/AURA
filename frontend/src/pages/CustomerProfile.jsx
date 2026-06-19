@@ -6,15 +6,26 @@ import api from "../api/axios";
 export default function CustomerProfile() {
   const { user, logout } = useAuth();
   const [bookings, setBookings] = useState([]);
+  const [salon, setSalon] = useState(null);
+  const [loadingSalon, setLoadingSalon] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (user?.role === "creator") {
+      setLoadingSalon(true);
+      api
+        .get("/upload/salon/me")
+        .then((r) => setSalon(r.data))
+        .catch(() => setSalon(null))
+        .finally(() => setLoadingSalon(false));
+    }
+
     api
       .get("/bookings/me")
       .then((r) => setBookings(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [user?.role]);
 
   return (
     <div className="min-h-screen bg-[#FAF7F4]">
@@ -50,6 +61,34 @@ export default function CustomerProfile() {
             <p className="text-sm text-gray-400">{user?.email}</p>
           </div>
         </div>
+
+        {user?.role === "creator" && (
+          <div className="bg-white rounded-2xl p-5 mb-6 shadow-sm">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+              My Salon
+            </p>
+            {loadingSalon ? (
+              <div className="py-6 flex justify-center">
+                <div className="w-5 h-5 border-2 border-[#6B2737] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : salon ? (
+              <Link to={`/salon/${salon.id}`} className="block hover:opacity-90 transition-opacity">
+                <p className="font-semibold text-[#2D2D2D]">{salon.name}</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  {salon.neighborhood ? `${salon.neighborhood}, ` : ""}{salon.city}
+                </p>
+                {salon.description && (
+                  <p className="text-sm text-gray-500 mt-3 leading-relaxed">{salon.description}</p>
+                )}
+                <p className="text-xs text-[#6B2737] mt-3 font-medium">Open salon profile →</p>
+              </Link>
+            ) : (
+              <p className="text-sm text-gray-400">
+                No salon found yet. Create one from the Studio.
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Bookings */}
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">

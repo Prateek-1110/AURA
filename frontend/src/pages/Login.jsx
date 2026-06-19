@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../api/AuthContext";
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextPath = searchParams.get("next");
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -22,7 +24,7 @@ export default function Login() {
     try {
       const { data } = await api.post("/auth/login", form);
       login({ id: data.user_id, name: data.name, role: data.role }, data.access_token);
-      navigate(data.role === "creator" ? "/creator/dashboard" : "/");
+      navigate(nextPath || (data.role === "creator" ? "/creator/dashboard" : "/"));
     } catch (err) {
       setError(err.response?.data?.detail || "Login failed");
     } finally {

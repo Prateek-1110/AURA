@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import api from "../api/axios";
+import SalonSetupForm from "../components/SalonSetupForm";
 
 // ── Transformation Upload ──────────────────────────────────────────────────────
 function TransformationUpload() {
@@ -217,6 +219,19 @@ function VideoUpload() {
 // ── Main Upload Page ───────────────────────────────────────────────────────────
 export default function UploadPage() {
   const [tab, setTab] = useState("transformation");
+  const [salon, setSalon] = useState(null);
+  const [loadingSalon, setLoadingSalon] = useState(true);
+
+  useEffect(() => {
+    api.get("/upload/salon/me")
+      .then(({ data }) => setSalon(data))
+      .catch((err) => {
+        if (err.response?.status !== 404) {
+          setSalon(null);
+        }
+      })
+      .finally(() => setLoadingSalon(false));
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream px-4 py-10">
@@ -224,30 +239,56 @@ export default function UploadPage() {
         <h1 className="font-display text-3xl text-charcoal mb-1">Studio</h1>
         <p className="text-gray-500 text-sm mb-8">Upload your work to start getting bookings.</p>
 
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setTab("transformation")}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition ${
-              tab === "transformation"
-                ? "bg-burgundy text-white"
-                : "bg-white border border-gray-200 text-charcoal hover:border-burgundy"
-            }`}
-          >
-            Before / After
-          </button>
-          <button
-            onClick={() => setTab("video")}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition ${
-              tab === "video"
-                ? "bg-charcoal text-white"
-                : "bg-white border border-gray-200 text-charcoal hover:border-charcoal"
-            }`}
-          >
-            Video
-          </button>
-        </div>
+        {loadingSalon ? (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+            <div className="h-5 w-44 bg-gray-100 rounded animate-pulse mb-3" />
+            <div className="h-4 w-72 bg-gray-100 rounded animate-pulse" />
+          </div>
+        ) : !salon ? (
+          <div className="mb-6">
+            <SalonSetupForm
+              heading="Create your salon first"
+              description="Uploads depend on a salon record. Create it once, then start adding transformations and videos."
+              onCreated={setSalon}
+            />
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6">
+            <p className="text-xs uppercase tracking-wide text-gray-400">Uploading as</p>
+            <p className="text-sm font-medium text-charcoal mt-1">
+              {salon.name} · {salon.neighborhood ? `${salon.neighborhood}, ` : ""}{salon.city}
+            </p>
+          </div>
+        )}
 
-        {tab === "transformation" ? <TransformationUpload /> : <VideoUpload />}
+        {salon && (
+          <>
+            <div className="flex gap-2 mb-6">
+              <button
+                onClick={() => setTab("transformation")}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition ${
+                  tab === "transformation"
+                    ? "bg-burgundy text-white"
+                    : "bg-white border border-gray-200 text-charcoal hover:border-burgundy"
+                }`}
+              >
+                Before / After
+              </button>
+              <button
+                onClick={() => setTab("video")}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition ${
+                  tab === "video"
+                    ? "bg-charcoal text-white"
+                    : "bg-white border border-gray-200 text-charcoal hover:border-charcoal"
+                }`}
+              >
+                Video
+              </button>
+            </div>
+
+            {tab === "transformation" ? <TransformationUpload /> : <VideoUpload />}
+          </>
+        )}
       </div>
     </div>
   );

@@ -49,6 +49,16 @@ def save_upload(file: UploadFile, dest_dir: Path, allowed_types: set, max_size: 
     return f"/static/{dest_dir.name}/{filename}"
 
 
+def _salon_dict(salon: Salon) -> dict:
+    return {
+        "id": salon.id,
+        "name": salon.name,
+        "city": salon.city,
+        "neighborhood": salon.neighborhood,
+        "description": salon.description,
+    }
+
+
 def get_creator_salon(creator: User, db: Session) -> Salon:
     salon = db.query(Salon).filter(Salon.owner_id == creator.id).first()
     if not salon:
@@ -167,7 +177,18 @@ def create_salon(
     db.add(salon)
     db.commit()
     db.refresh(salon)
-    return {"id": salon.id, "name": salon.name, "city": salon.city}
+    return _salon_dict(salon)
+
+
+@router.get("/salon/me")
+def get_my_salon(
+    db: Session = Depends(get_db),
+    creator: User = Depends(require_creator),
+):
+    salon = db.query(Salon).filter(Salon.owner_id == creator.id).first()
+    if not salon:
+        raise HTTPException(status_code=404, detail="Salon not found")
+    return _salon_dict(salon)
 router.get("/transformations")
 def get_creator_transformations(
     db: Session = Depends(get_db),
