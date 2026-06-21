@@ -1,0 +1,46 @@
+import { Link } from "react-router-dom";
+
+export default function Footer() {
+  return (
+    <footer className="bg-charcoal text-white mt-auto">
+      <div className="max-w-6xl mx-auto px-5 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+          <div>
+            <p className="font-display text-2xl mb-3">AURA</p>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Discover, book, and preview your next hair transformation with AI.
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">For Customers</p>
+            <div className="space-y-2">
+              <Link to="/explore" className="block text-sm text-gray-300 hover:text-white transition">Explore Salons</Link>
+              <Link to="/customer/bookings" className="block text-sm text-gray-300 hover:text-white transition">My Bookings</Link>
+              <Link to="/customer/saved" className="block text-sm text-gray-300 hover:text-white transition">Saved Creators</Link>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">For Creators</p>
+            <div className="space-y-2">
+              <Link to="/register?role=creator" className="block text-sm text-gray-300 hover:text-white transition">Join as Creator</Link>
+              <Link to="/creator/dashboard" className="block text-sm text-gray-300 hover:text-white transition">Creator Dashboard</Link>
+              <Link to="/creator/upload" className="block text-sm text-gray-300 hover:text-white transition">Upload Work</Link>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Company</p>
+            <div className="space-y-2">
+              <span className="block text-sm text-gray-300">About</span>
+              <span className="block text-sm text-gray-300">Privacy</span>
+              <span className="block text-sm text-gray-300">Terms</span>
+            </div>
+          </div>
+        </div>
+        <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-gray-500">© 2025 AURA. Bangalore, India.</p>
+          <p className="text-xs text-gray-500">AI-powered hair salon discovery</p>
+        </div>
+      </div>
+    </footer>
+  );
+}

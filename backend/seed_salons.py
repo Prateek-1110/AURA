@@ -16,6 +16,7 @@ The script is idempotent: rerunning it updates the same salons by slug.
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import random
 import re
@@ -597,15 +598,30 @@ def choose_photo_pairs(rng: random.Random, salon_slug: str, services: list[Servi
     return pairs
 
 
+HAIR_BEFORE_POOL = [
+    'https://images.pexels.com/photos/15191983/pexels-photo-15191983.jpeg?cs=srgb&dl=pexels-andres-chirrisco-174853810-15191983.jpg&fm=jpg',
+    'https://images.pexels.com/photos/10318038/pexels-photo-10318038.jpeg?cs=srgb&dl=pexels-ron-lach-10318038.jpg&fm=jpg',
+    'https://images.pexels.com/photos/7440133/pexels-photo-7440133.jpeg?cs=srgb&dl=pexels-cottonbro-7440133.jpg&fm=jpg',
+    'https://images.pexels.com/photos/3992861/pexels-photo-3992861.jpeg?cs=srgb&dl=pexels-cottonbro-3992861.jpg&fm=jpg',
+    'https://images.pexels.com/photos/7755473/pexels-photo-7755473.jpeg?cs=srgb&dl=pexels-rdne-7755473.jpg&fm=jpg',
+    'https://images.pexels.com/photos/34930126/pexels-photo-34930126.jpeg?cs=srgb&dl=pexels-jose-antonio-otegui-auzmendi-2150489988-34930126.jpg&fm=jpg',
+    'https://images.pexels.com/photos/15191980/pexels-photo-15191980.jpeg?cs=srgb&dl=pexels-andres-chirrisco-174853810-15191980.jpg&fm=jpg'
+]
+
+HAIR_AFTER_POOL = [
+    'https://images.pexels.com/photos/15191980/pexels-photo-15191980.jpeg?cs=srgb&dl=pexels-andres-chirrisco-174853810-15191980.jpg&fm=jpg',
+    'https://images.pexels.com/photos/5368632/pexels-photo-5368632.jpeg?cs=srgb&dl=pexels-sergeymakashin-5368632.jpg&fm=jpg',
+    'https://images.pexels.com/photos/5368629/pexels-photo-5368629.jpeg?cs=srgb&dl=pexels-sergeymakashin-5368629.jpg&fm=jpg',
+    'https://images.pexels.com/photos/7755226/pexels-photo-7755226.jpeg?cs=srgb&dl=pexels-rdne-7755226.jpg&fm=jpg',
+    'https://images.pexels.com/photos/28994388/pexels-photo-28994388.jpeg?cs=srgb&dl=pexels-thefullonmonet-28994388.jpg&fm=jpg',
+    'https://images.pexels.com/photos/15191985/pexels-photo-15191985.jpeg?cs=srgb&dl=pexels-andres-chirrisco-174853810-15191985.jpg&fm=jpg'
+]
+
+
 def build_hair_image_url(seed: str, keyword: str, variant: str) -> str:
-    unsplash = f"https://source.unsplash.com/800x600/?hair,{keyword}&sig={uuid.uuid5(uuid.NAMESPACE_URL, seed)}"
-    try:
-        response = requests.get(unsplash, timeout=12)
-        if response.status_code == 200:
-            return unsplash
-    except Exception:
-        pass
-    return f"https://picsum.photos/seed/{slugify(seed)}-{variant}/800/600"
+    pool = HAIR_AFTER_POOL if variant == "after" else HAIR_BEFORE_POOL
+    digest = hashlib.sha1(f"{seed}-{keyword}-{variant}".encode("utf-8")).hexdigest()
+    return pool[int(digest[:8], 16) % len(pool)]
 
 
 def build_salon_profiles() -> list[SalonProfile]:

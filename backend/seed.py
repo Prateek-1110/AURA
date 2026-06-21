@@ -61,15 +61,15 @@ def download_image(url: str, filename: str) -> str:
 
 
 # ─── Transformation data ─────────────────────────────────────────────────────
-# Using picsum with fixed seeds for deterministic placeholder images.
-# SWAP these with actual hair photos before demo for maximum impact.
+# Using fixed public hair-salon stock photos for deterministic demo images.
+# Keep these URLs in sync with the frontend mock data.
 
 TRANSFORMATIONS = [
     {
         "filename_before": "t1_before.jpg",
         "filename_after":  "t1_after.jpg",
-        "before_url":  "https://picsum.photos/seed/hair_b1/400/500",
-        "after_url":   "https://picsum.photos/seed/hair_a1/400/500",
+        "before_url":  "https://images.pexels.com/photos/15191983/pexels-photo-15191983.jpeg?cs=srgb&dl=pexels-andres-chirrisco-174853810-15191983.jpg&fm=jpg",
+        "after_url":   "https://images.pexels.com/photos/5368632/pexels-photo-5368632.jpeg?cs=srgb&dl=pexels-sergeymakashin-5368632.jpg&fm=jpg",
         "artist_name": "Deepika R",
         "service_type": "Balayage",
         "hair_texture_tag": "straight",
@@ -83,8 +83,8 @@ TRANSFORMATIONS = [
     {
         "filename_before": "t2_before.jpg",
         "filename_after":  "t2_after.jpg",
-        "before_url":  "https://picsum.photos/seed/hair_b2/400/500",
-        "after_url":   "https://picsum.photos/seed/hair_a2/400/500",
+        "before_url":  "https://images.pexels.com/photos/7440133/pexels-photo-7440133.jpeg?cs=srgb&dl=pexels-cottonbro-7440133.jpg&fm=jpg",
+        "after_url":   "https://images.pexels.com/photos/7755226/pexels-photo-7755226.jpeg?cs=srgb&dl=pexels-rdne-7755226.jpg&fm=jpg",
         "artist_name": "Meena K",
         "service_type": "Curly Transformation",
         "hair_texture_tag": "wavy",
@@ -97,8 +97,8 @@ TRANSFORMATIONS = [
     {
         "filename_before": "t3_before.jpg",
         "filename_after":  "t3_after.jpg",
-        "before_url":  "https://picsum.photos/seed/hair_b3/400/500",
-        "after_url":   "https://picsum.photos/seed/hair_a3/400/500",
+        "before_url":  "https://images.pexels.com/photos/10318038/pexels-photo-10318038.jpeg?cs=srgb&dl=pexels-ron-lach-10318038.jpg&fm=jpg",
+        "after_url":   "https://images.pexels.com/photos/28994388/pexels-photo-28994388.jpeg?cs=srgb&dl=pexels-thefullonmonet-28994388.jpg&fm=jpg",
         "artist_name": "Deepika R",
         "service_type": "Korean Glass Hair",
         "hair_texture_tag": "straight",
@@ -111,8 +111,8 @@ TRANSFORMATIONS = [
     {
         "filename_before": "t4_before.jpg",
         "filename_after":  "t4_after.jpg",
-        "before_url":  "https://picsum.photos/seed/hair_b4/400/500",
-        "after_url":   "https://picsum.photos/seed/hair_a4/400/500",
+        "before_url":  "https://images.pexels.com/photos/3992861/pexels-photo-3992861.jpeg?cs=srgb&dl=pexels-cottonbro-3992861.jpg&fm=jpg",
+        "after_url":   "https://images.pexels.com/photos/15191985/pexels-photo-15191985.jpeg?cs=srgb&dl=pexels-andres-chirrisco-174853810-15191985.jpg&fm=jpg",
         "artist_name": "Ritu S",
         "service_type": "Short Bob",
         "hair_texture_tag": "curly",
@@ -289,7 +289,7 @@ def seed():
         print(f"   {len(t_records)} transformations, 1 published video (score 78.4), 1 booking")
         print(f"   Mirror fallback image: {fallback_path}")
         print()
-        print("   ⚠  Swap picsum placeholders with real hair photos for max demo impact.")
+        print("   ⚠  Demo images now use salon-appropriate Pexels hair photos.")
         print(f"      Images are in: {STATIC_IMAGES}")
 
     except Exception as e:

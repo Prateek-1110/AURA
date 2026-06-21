@@ -94,7 +94,22 @@ class Booking(Base):
     salon_id = Column(Integer, ForeignKey("salons.id"), nullable=False)
     status = Column(String, default="confirmed")
     booked_at = Column(DateTime(timezone=True), server_default=func.now())
+    notes = Column(Text, nullable=True)
+    payment_method = Column(String, default="upi")
+    time_slot = Column(String, nullable=True)
+    price = Column(Float, nullable=True)
 
     customer = relationship("User", back_populates="bookings")
     transformation = relationship("Transformation", back_populates="bookings")
     salon = relationship("Salon", back_populates="bookings")
+
+
+class OTPVerification(Base):
+    __tablename__ = "otp_verifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, index=True, nullable=False)
+    otp = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+

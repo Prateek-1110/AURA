@@ -10,11 +10,17 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
     role: str   # "creator" | "customer"
+    otp: str    # OTP verification code
+
+
+class OTPSendRequest(BaseModel):
+    email: EmailStr
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
 
 
 class TokenResponse(BaseModel):
