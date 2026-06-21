@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../api/AuthContext";
 import Navbar from "../../components/Navbar";
@@ -33,10 +34,23 @@ export default function ProfileEditor() {
   }
 
   async function handleSave(e) {
-    e.preventDefault();
-    setSaving(true); setError(""); setSaved(false);
+    if (e) e.preventDefault();
+    setError(""); setSaved(false);
+
+    const phoneDigits = (form.phone || "").replace(/\D/g, "");
+    if (form.phone && form.phone.trim() && phoneDigits.length !== 10) {
+      setError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
+    setSaving(true);
     try {
-      await api.patch("/upload/salon/me", form);
+      const payload = {
+        ...form,
+        phone: phoneDigits || null,
+        experience_years: form.experience_years ? parseInt(form.experience_years, 10) : null
+      };
+      await api.patch("/upload/salon/me", payload);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
@@ -59,6 +73,9 @@ export default function ProfileEditor() {
     <div className="min-h-screen bg-cream flex flex-col">
       <Navbar />
       <div className="max-w-3xl mx-auto px-5 py-8 w-full flex-1">
+        <Link to="/creator/dashboard" className="text-xs text-gray-400 hover:text-charcoal transition mb-4 inline-block">
+          ← Back to Dashboard
+        </Link>
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="font-display text-3xl text-charcoal">Edit Profile</h1>

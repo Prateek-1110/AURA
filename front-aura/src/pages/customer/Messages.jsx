@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../api/AuthContext";
 import Navbar from "../../components/Navbar";
 
@@ -36,24 +37,63 @@ function formatTime(time) { return time; }
 
 export default function Messages() {
   const { user } = useAuth();
-  const [conversations] = useState(MOCK_CONVERSATIONS);
-  const [activeConv, setActiveConv] = useState(null);
+  const [conversations, setConversations] = useState(MOCK_CONVERSATIONS);
+  const [activeConvId, setActiveConvId] = useState(null);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    if (activeConv) setMessages(activeConv.messages);
-  }, [activeConv]);
+  const activeConv = conversations.find(c => c.id === activeConvId);
+  const messages = activeConv ? activeConv.messages : [];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   function sendMessage() {
-    if (!input.trim()) return;
-    setMessages(prev => [...prev, { id: Date.now(), from: "me", text: input.trim(), time: "now" }]);
+    if (!input.trim() || !activeConvId) return;
+    const currentInput = input.trim();
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMessage = { id: Date.now(), from: "me", text: currentInput, time: timeStr };
+
+    setConversations(prev => prev.map(c => {
+      if (c.id === activeConvId) {
+        return {
+          ...c,
+          messages: [...c.messages, newMessage],
+          lastMessage: currentInput,
+          time: "Just now",
+          unread: 0
+        };
+      }
+      return c;
+    }));
     setInput("");
+
+    // Simulate an automatic realistic reply after 1.5 seconds!
+    const replies = [
+      "Thanks! Let me check the schedule and get back to you in a few minutes.",
+      "Sounds good! We will be ready for you. See you soon!",
+      "Perfect! Let me know if you need to adjust the time.",
+      "Yes, we can accommodate that. Let me lock in the slot.",
+      "That works perfectly for us! See you then."
+    ];
+    const randomReply = replies[Math.floor(Math.random() * replies.length)];
+
+    setTimeout(() => {
+      setConversations(prev => prev.map(c => {
+        if (c.id === activeConvId) {
+          const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const replyMessage = { id: Date.now() + 1, from: "them", text: randomReply, time: replyTime };
+          return {
+            ...c,
+            messages: [...c.messages, replyMessage],
+            lastMessage: replyMessage.text,
+            time: "Just now"
+          };
+        }
+        return c;
+      }));
+    }, 1500);
   }
 
   const relevantConvs = user?.role === "creator"
@@ -63,7 +103,12 @@ export default function Messages() {
   return (
     <div className="min-h-screen bg-cream flex flex-col">
       <Navbar />
-      <div className="flex-1 flex max-w-5xl mx-auto w-full px-0 sm:px-5 sm:py-6">
+      <div className="max-w-5xl mx-auto w-full px-5 pt-6 flex-shrink-0">
+        <Link to={user?.role === "creator" ? "/creator/dashboard" : "/customer/dashboard"} className="text-xs text-gray-400 hover:text-charcoal transition inline-block">
+          ← Back to Dashboard
+        </Link>
+      </div>
+      <div className="max-w-5xl mx-auto w-full px-0 sm:px-5 sm:pb-6 sm:pt-2 flex-1 flex">
         <div className="flex flex-1 bg-white sm:rounded-2xl sm:border border-gray-100 sm:shadow-sm overflow-hidden" style={{ height: "calc(100vh - 120px)" }}>
 
           {/* Conversations list */}
@@ -76,7 +121,7 @@ export default function Messages() {
                 <div className="p-6 text-center text-gray-400 text-sm">No conversations yet.</div>
               ) : (
                 relevantConvs.map(conv => (
-                  <button key={conv.id} onClick={() => setActiveConv(conv)}
+                  <button key={conv.id} onClick={() => setActiveConvId(conv.id)}
                     className={`w-full text-left px-4 py-3.5 flex items-center gap-3 border-b border-gray-50 hover:bg-cream transition ${
                       activeConv?.id === conv.id ? "bg-burgundy/5" : ""
                     }`}>
@@ -106,7 +151,7 @@ export default function Messages() {
             <div className="flex-1 flex flex-col">
               {/* Chat header */}
               <div className="px-4 py-3.5 border-b border-gray-100 flex items-center gap-3">
-                <button onClick={() => setActiveConv(null)} className="sm:hidden text-gray-400 hover:text-charcoal mr-1">
+                <button onClick={() => setActiveConvId(null)} className="sm:hidden text-gray-400 hover:text-charcoal mr-1">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 </button>
                 <div className="w-8 h-8 rounded-full bg-burgundy flex items-center justify-center text-white font-bold text-xs flex-shrink-0">

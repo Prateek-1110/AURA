@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../api/AuthContext";
 import Navbar from "../../components/Navbar";
@@ -131,6 +131,9 @@ export default function ContentUpload() {
     <div className="min-h-screen bg-cream flex flex-col">
       <Navbar />
       <div className="max-w-2xl mx-auto px-5 py-8 w-full flex-1">
+        <Link to="/creator/dashboard" className="text-xs text-gray-400 hover:text-charcoal transition mb-4 inline-block">
+          ← Back to Dashboard
+        </Link>
         <div className="mb-6">
           <h1 className="font-display text-3xl text-charcoal">Upload Content</h1>
           <p className="text-gray-400 text-sm mt-1">Add to your portfolio or publish a video</p>

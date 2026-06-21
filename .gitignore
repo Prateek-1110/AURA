@@ -7,7 +7,7 @@ front-aura/node_modules/
 dist/
 front-aura/dist/
 build/
-
+front-aura/.env
 # Virtual Environments
 venv/
 myenv/

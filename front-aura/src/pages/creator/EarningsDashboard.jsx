@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 
 const MOCK_TRANSACTIONS = [
@@ -34,6 +35,9 @@ export default function EarningsDashboard() {
     <div className="min-h-screen bg-cream flex flex-col">
       <Navbar />
       <div className="max-w-4xl mx-auto px-5 py-8 w-full flex-1">
+        <Link to="/creator/dashboard" className="text-xs text-gray-400 hover:text-charcoal transition mb-4 inline-block">
+          ← Back to Dashboard
+        </Link>
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="font-display text-3xl text-charcoal">Earnings</h1>

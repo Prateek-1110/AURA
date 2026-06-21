@@ -29,11 +29,27 @@ export default function CreatorOnboarding() {
   }
 
   async function handleSubmit() {
+    const phoneDigits = form.phone.replace(/\D/g, "");
+    if (!form.phone.trim()) {
+      setError("Phone number is required.");
+      return;
+    }
+    if (phoneDigits.length !== 10) {
+      setError("Phone number must be exactly 10 digits.");
+      return;
+    }
     setLoading(true); setError("");
     try {
       await api.post("/upload/salon", {
-        name: form.name, city: form.city, neighborhood: form.neighborhood,
-        description: form.description, service_types: form.service_types, texture_tags: form.texture_tags,
+        name: form.name,
+        city: form.city,
+        neighborhood: form.neighborhood,
+        description: form.description,
+        service_types: form.service_types,
+        texture_tags: form.texture_tags,
+        phone: phoneDigits,
+        instagram: form.instagram || null,
+        experience_years: form.experience_years ? parseInt(form.experience_years, 10) : null,
       });
       navigate("/creator/dashboard");
     } catch (err) {
@@ -46,7 +62,7 @@ export default function CreatorOnboarding() {
     form.name.trim() && form.city,
     form.service_types.length > 0,
     form.description.trim().length > 20,
-    true,
+    form.phone.trim() && form.phone.replace(/\D/g, "").length === 10,
   ];
 
   return (

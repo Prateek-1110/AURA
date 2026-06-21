@@ -7,7 +7,7 @@ from typing import Optional
 from app.database import get_db
 from app.models.models import Salon, Transformation, User
 from app.services.auth_service import require_creator
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 router = APIRouter(prefix="/upload", tags=["upload"])
 
@@ -43,6 +43,19 @@ class SalonCreate(BaseModel):
     city: str = "Bangalore"
     neighborhood: str = ""
     description: str = ""
+    phone: Optional[str] = None
+    instagram: Optional[str] = None
+    experience_years: Optional[int] = None
+
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            digits = "".join(filter(str.isdigit, v))
+            if len(digits) != 10:
+                raise ValueError("Phone number must be exactly 10 digits")
+            return digits
+        return v
 
 
 class SalonUpdate(BaseModel):
@@ -54,6 +67,16 @@ class SalonUpdate(BaseModel):
     instagram: Optional[str] = None
     experience_years: Optional[int] = None
     open_for_bookings: Optional[bool] = None
+
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            digits = "".join(filter(str.isdigit, v))
+            if len(digits) != 10:
+                raise ValueError("Phone number must be exactly 10 digits")
+            return digits
+        return v
 
 
 def _salon_dict(salon: Salon, db: Session) -> dict:
@@ -88,6 +111,9 @@ def create_salon(
         city=payload.city,
         neighborhood=payload.neighborhood,
         description=payload.description,
+        phone=payload.phone,
+        instagram=payload.instagram,
+        experience_years=payload.experience_years,
     )
     db.add(salon)
     db.commit()

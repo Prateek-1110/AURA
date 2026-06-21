@@ -32,6 +32,46 @@ PERSONA_FALLBACKS = {
         "watch_through": 83, "liked": False, "shared": False, "skipped_at": None,
         "comment": "Needs to feel more premium. Add salon interior and price range.",
     },
+    "Kiran": {
+        "watch_through": 90, "liked": True, "shared": False, "skipped_at": None,
+        "comment": "The sectioning and color melt technique is top tier. Good work!",
+    },
+    "Rohan": {
+        "watch_through": 40, "liked": True, "shared": True, "skipped_at": 12,
+        "comment": "That taper fade looks clean, who was the stylist?",
+    },
+    "Farah": {
+        "watch_through": 80, "liked": True, "shared": True, "skipped_at": None,
+        "comment": "Aesthetically gorgeous reel. The styling feels very global.",
+    },
+    "Vikram": {
+        "watch_through": 65, "liked": False, "shared": False, "skipped_at": 15,
+        "comment": "Do you have slots for Saturday morning? Direct booking link please.",
+    },
+    "Neha": {
+        "watch_through": 70, "liked": True, "shared": True, "skipped_at": None,
+        "comment": "Are there student discounts on the keratin treatment?",
+    },
+    "Arjun": {
+        "watch_through": 50, "liked": False, "shared": False, "skipped_at": 10,
+        "comment": "Looks decent but please post reviews and prices.",
+    },
+    "Zoya": {
+        "watch_through": 95, "liked": True, "shared": True, "skipped_at": None,
+        "comment": "Love the bold color shift! Absolute art.",
+    },
+    "Mansi": {
+        "watch_through": 75, "liked": True, "shared": False, "skipped_at": None,
+        "comment": "What products are used for this hair spa? Looks very soothing.",
+    },
+    "Sanjay": {
+        "watch_through": 35, "liked": False, "shared": False, "skipped_at": 8,
+        "comment": "A bit too loud for me, but the haircut is very neat.",
+    },
+    "Sneha": {
+        "watch_through": 85, "liked": True, "shared": False, "skipped_at": None,
+        "comment": "The messy-chic finish is so effortless. Loved it.",
+    },
 }
 
 
@@ -194,6 +234,16 @@ def _synthetic_fallback(persona: dict) -> dict:
         "Riya":   {"watch_through": 30, "liked": True,  "shared": True,  "skipped_at": 6,    "comment": "omg need this immediately 😭"},
         "Meera":  {"watch_through": 95, "liked": True,  "shared": False, "skipped_at": None, "comment": "The balayage technique here is really clean — great colour melt."},
         "Divya":  {"watch_through": 60, "liked": False, "shared": False, "skipped_at": 12,   "comment": None},
+        "Kiran":  {"watch_through": 90, "liked": True,  "shared": False, "skipped_at": None, "comment": "The sectioning and color melt technique is top tier. Good work!"},
+        "Rohan":  {"watch_through": 40, "liked": True,  "shared": True,  "skipped_at": 12,   "comment": "That taper fade looks clean, who was the stylist?"},
+        "Farah":  {"watch_through": 80, "liked": True,  "shared": True,  "skipped_at": None, "comment": "Aesthetically gorgeous reel. The styling feels very global."},
+        "Vikram": {"watch_through": 65, "liked": False, "shared": False, "skipped_at": 15,   "comment": "Do you have slots for Saturday morning? Direct booking link please."},
+        "Neha":   {"watch_through": 70, "liked": True,  "shared": True,  "skipped_at": None, "comment": "Are there student discounts on the keratin treatment?"},
+        "Arjun":  {"watch_through": 50, "liked": False, "shared": False, "skipped_at": 10,   "comment": "Looks decent but please post reviews and prices."},
+        "Zoya":   {"watch_through": 95, "liked": True,  "shared": True,  "skipped_at": None, "comment": "Love the bold color shift! Absolute art."},
+        "Mansi":  {"watch_through": 75, "liked": True,  "shared": False, "skipped_at": None, "comment": "What products are used for this hair spa? Looks very soothing."},
+        "Sanjay": {"watch_through": 35, "liked": False, "shared": False, "skipped_at": 8,    "comment": "A bit too loud for me, but the haircut is very neat."},
+        "Sneha":  {"watch_through": 85, "liked": True,  "shared": False, "skipped_at": None, "comment": "The messy-chic finish is so effortless. Loved it."},
     }
     return fallbacks.get(persona["name"], {
         "watch_through": 50, "liked": False, "shared": False, "skipped_at": None, "comment": None,

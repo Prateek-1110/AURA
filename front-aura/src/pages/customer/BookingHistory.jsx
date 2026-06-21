@@ -56,6 +56,9 @@ export default function BookingHistory() {
     <div className="min-h-screen bg-cream flex flex-col">
       <Navbar />
       <div className="max-w-3xl mx-auto px-5 py-8 w-full flex-1">
+        <Link to="/customer/dashboard" className="text-xs text-gray-400 hover:text-charcoal transition mb-4 inline-block">
+          ← Back to Dashboard
+        </Link>
         <div className="mb-6">
           <h1 className="font-display text-3xl text-charcoal">Booking History</h1>
           <p className="text-gray-400 text-sm mt-1">{bookings.length} appointments total</p>

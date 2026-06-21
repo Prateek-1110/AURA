@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../api/AuthContext";
 import api from "../api/axios";
 import Navbar from "../components/Navbar";
@@ -66,6 +66,9 @@ export default function Settings() {
     <div className="min-h-screen bg-cream flex flex-col">
       <Navbar />
       <div className="max-w-4xl mx-auto px-5 py-8 w-full flex-1">
+        <Link to={user?.role === "creator" ? "/creator/dashboard" : "/customer/dashboard"} className="text-xs text-gray-400 hover:text-charcoal transition mb-4 inline-block">
+          ← Back to Dashboard
+        </Link>
         <h1 className="font-display text-3xl text-charcoal mb-6">Settings</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

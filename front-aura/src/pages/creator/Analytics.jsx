@@ -1,6 +1,47 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../../api/axios";
 import Navbar from "../../components/Navbar";
+
+function FileDropZone({ label, accept, value, onChange, preview }) {
+  const ref = useRef();
+  const [dragging, setDragging] = useState(false);
+
+  function handleFiles(files) {
+    const f = files[0];
+    if (f) onChange(f);
+  }
+
+  return (
+    <div
+      className={`border-2 border-dashed rounded-2xl p-6 text-center transition cursor-pointer ${
+        dragging ? "border-burgundy bg-burgundy/5" : "border-gray-200 hover:border-burgundy/40"
+      }`}
+      onClick={() => ref.current.click()}
+      onDragOver={e => { e.preventDefault(); setDragging(true); }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={e => { e.preventDefault(); setDragging(false); handleFiles(e.dataTransfer.files); }}
+    >
+      <input ref={ref} type="file" accept={accept} className="hidden" onChange={e => handleFiles(e.target.files)} />
+      {preview ? (
+        <div className="relative">
+          <video src={URL.createObjectURL(preview)} className="max-h-40 mx-auto rounded-xl object-contain" />
+          <p className="text-xs text-gray-400 mt-2 truncate">{preview.name}</p>
+        </div>
+      ) : (
+        <>
+          <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-3 text-2xl">
+            🎬
+          </div>
+          <p className="text-sm font-medium text-charcoal">{label}</p>
+          <p className="text-xs text-gray-400 mt-1">Drop video file or click to browse</p>
+          <p className="text-xs text-gray-300 mt-0.5">MP4, MOV up to 200MB</p>
+        </>
+      )}
+    </div>
+  );
+}
+
 
 const MOCK_VIDEOS = [
   { id: 1, title: "Balayage Transformation — Wavy Hair", status: "published", virality_score: 87.4, views: 12400, saves: 340, try_ons: 89, created_at: "Jun 15", trend: "up" },
@@ -35,9 +76,50 @@ function MiniBar({ value, max, color = "bg-burgundy" }) {
 }
 
 export default function Analytics() {
+  const navigate = useNavigate();
   const [videos, setVideos] = useState(MOCK_VIDEOS);
   const [loading, setLoading] = useState(false);
   const [sort, setSort] = useState("virality");
+  const [showUpload, setShowUpload] = useState(false);
+
+  // Video upload state
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoTitle, setVideoTitle] = useState("");
+  const [videoDesc, setVideoDesc] = useState("");
+  const [videoLoading, setVideoLoading] = useState(false);
+  const [videoError, setVideoError] = useState("");
+  const [videoSuccess, setVideoSuccess] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  async function handleVideoUpload(e) {
+    e.preventDefault();
+    if (!videoFile || !videoTitle) return;
+    setVideoLoading(true); setVideoError(""); setVideoSuccess(false); setUploadProgress(0);
+    try {
+      const fd = new FormData();
+      fd.append("video", videoFile);
+      fd.append("title", videoTitle);
+      if (videoDesc) fd.append("description", videoDesc);
+
+      const { data } = await api.post("/virality/video", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (ev) => {
+          if (ev.total) setUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+        },
+      });
+      setVideoSuccess(true);
+      setVideoFile(null); setVideoTitle(""); setVideoDesc(""); setUploadProgress(0);
+      setVideos(prev => [data, ...prev]);
+      setTimeout(() => {
+        navigate(`/creator/video/${data.id}`);
+      }, 1500);
+    } catch (err) {
+      setVideoError(err.response?.data?.detail || "Upload failed. Please try again.");
+    } finally {
+      setVideoLoading(false);
+    }
+  }
+
 
   useEffect(() => {
     setLoading(true);
@@ -66,10 +148,75 @@ export default function Analytics() {
     <div className="min-h-screen bg-cream flex flex-col">
       <Navbar />
       <div className="max-w-4xl mx-auto px-5 py-8 w-full flex-1">
-        <div className="mb-6">
-          <h1 className="font-display text-3xl text-charcoal">Analytics</h1>
-          <p className="text-gray-400 text-sm mt-1">Video virality scores and engagement</p>
+        <Link to="/creator/dashboard" className="text-xs text-gray-400 hover:text-charcoal transition mb-4 inline-block">
+          ← Back to Dashboard
+        </Link>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl text-charcoal">Analytics</h1>
+            <p className="text-gray-400 text-sm mt-1">Video virality scores and engagement</p>
+          </div>
+          <button
+            onClick={() => setShowUpload(!showUpload)}
+            className="self-start sm:self-auto bg-burgundy text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-burgundy-dark transition shadow-sm flex items-center gap-1.5"
+          >
+            {showUpload ? "Hide Upload ✕" : "Upload New Video +"}
+          </button>
         </div>
+
+        {/* Collapsible Video Upload Drawer */}
+        {showUpload && (
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-8 transition-all duration-300">
+            <h2 className="font-semibold text-charcoal text-base mb-2">Simulate Video Virality</h2>
+            <p className="text-xs text-gray-400 mb-4">Upload a video before posting to simulate performance across 15 synthetic personas.</p>
+
+            <form onSubmit={handleVideoUpload} className="space-y-4">
+              {videoSuccess && (
+                <div className="bg-teal-50 border border-teal-200 text-teal-700 text-sm rounded-xl px-4 py-3 flex items-center gap-2">
+                  <span>✓</span> Video uploaded successfully! Running AI virality check...
+                </div>
+              )}
+              {videoError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{videoError}</div>
+              )}
+
+              <FileDropZone label="Upload your salon / hair styling video" accept="video/*" value={videoFile} onChange={setVideoFile} preview={videoFile} />
+
+              {videoLoading && uploadProgress > 0 && (
+                <div>
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Uploading video...</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="bg-burgundy h-2 rounded-full transition-all" style={{ width: `${uploadProgress}%` }} />
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Video title</label>
+                  <input value={videoTitle} onChange={e => setVideoTitle(e.target.value)} required
+                    placeholder="e.g. Balayage Transformation — Koramangala Studio"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-burgundy transition" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Description (optional)</label>
+                  <input value={videoDesc} onChange={e => setVideoDesc(e.target.value)}
+                    placeholder="Details about the style, products used, etc."
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-burgundy transition" />
+                </div>
+              </div>
+
+              <button type="submit" disabled={!videoFile || !videoTitle || videoLoading}
+                className="w-full bg-burgundy text-white py-3 rounded-xl text-sm font-semibold hover:bg-burgundy-dark transition disabled:opacity-40">
+                {videoLoading ? `Uploading ${uploadProgress > 0 ? `(${uploadProgress}%)` : "..."}` : "Analyze Virality"}
+              </button>
+            </form>
+          </div>
+        )}
+
 
         {/* Overview stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

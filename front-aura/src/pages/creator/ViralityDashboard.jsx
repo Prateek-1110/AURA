@@ -10,6 +10,16 @@ const PERSONA_META = {
   Riya:   { emoji: "🎓",  bg: "bg-violet-50", ring: "ring-violet-200", text: "text-violet-700", bar: "bg-violet-400", label: "19 · College Student · Indiranagar" },
   Meera:  { emoji: "💄",  bg: "bg-teal-50",   ring: "ring-teal-200",   text: "text-teal-700",   bar: "bg-teal-400",   label: "28 · Beauty Creator · HSR Layout" },
   Divya:  { emoji: "🏠",  bg: "bg-slate-50",  ring: "ring-slate-200",  text: "text-slate-600",  bar: "bg-slate-400",  label: "42 · Homemaker · Jayanagar" },
+  Kiran:  { emoji: "💇‍♂️", bg: "bg-emerald-50", ring: "ring-emerald-200", text: "text-emerald-700", bar: "bg-emerald-400", label: "27 · Stylist · Malleshwaram" },
+  Rohan:  { emoji: "💪",  bg: "bg-blue-50",    ring: "ring-blue-200",    text: "text-blue-700",    bar: "bg-blue-400",    label: "22 · Trainer · HSR Layout" },
+  Farah:  { emoji: "👗",  bg: "bg-fuchsia-50", ring: "ring-fuchsia-200", text: "text-fuchsia-700", bar: "bg-fuchsia-400", label: "35 · Designer · Bandra" },
+  Vikram: { emoji: "⚖️",  bg: "bg-indigo-50",  ring: "ring-indigo-200",  text: "text-indigo-700",  bar: "bg-indigo-400",  label: "29 · Lawyer · Indiranagar" },
+  Neha:   { emoji: "🎒",  bg: "bg-pink-50",    ring: "ring-pink-200",    text: "text-pink-700",    bar: "bg-pink-400",    label: "25 · Student · Jayanagar" },
+  Arjun:  { emoji: "💻",  bg: "bg-sky-50",     ring: "ring-sky-200",     text: "text-sky-700",     bar: "bg-sky-400",     label: "33 · Tech Lead · Whitefield" },
+  Zoya:   { emoji: "🎨",  bg: "bg-purple-50",  ring: "ring-purple-200",  text: "text-purple-700",  bar: "bg-purple-400",  label: "21 · Art Student · Powai" },
+  Mansi:  { emoji: "🌿",  bg: "bg-green-50",   ring: "ring-green-200",   text: "text-green-700",   bar: "bg-green-400",   label: "28 · Marketer · Koramangala" },
+  Sanjay: { emoji: "💼",  bg: "bg-orange-50",  ring: "ring-orange-200",  text: "text-orange-700",  bar: "bg-orange-400",  label: "45 · Banker · Malleshwaram" },
+  Sneha:  { emoji: "✍️",  bg: "bg-cyan-50",    ring: "ring-cyan-200",    text: "text-cyan-700",    bar: "bg-cyan-400",    label: "26 · Writer · Versova" },
 };
 
 const BREAKDOWN_LABELS = {
@@ -256,13 +266,17 @@ function DropoffTimeline({ personas, durationSec }) {
 }
 
 function SimulatingView() {
-  const personas = ["Priya", "Ananya", "Riya", "Meera", "Divya"];
+  const personas = [
+    "Priya", "Ananya", "Riya", "Meera", "Divya",
+    "Kiran", "Rohan", "Farah", "Vikram", "Neha",
+    "Arjun", "Zoya", "Mansi", "Sanjay", "Sneha"
+  ];
   return (
     <div className="py-8 space-y-4">
       <div className="text-center space-y-2 mb-6">
         <div className="w-10 h-10 border-4 border-burgundy/20 border-t-burgundy rounded-full animate-spin mx-auto" />
         <p className="text-sm font-medium text-charcoal">Simulating your audience…</p>
-        <p className="text-xs text-gray-400">5 personas are watching your video right now</p>
+        <p className="text-xs text-gray-400">15 personas are watching your video right now</p>
       </div>
       <div className="grid grid-cols-1 gap-3">
         {personas.map((name, i) => {
@@ -294,6 +308,290 @@ function SimulatingView() {
   );
 }
 
+function RetentionCurveChart({ personas, durationSec }) {
+  const duration = durationSec || 30;
+  const pointsCount = 10;
+  const dataPoints = [];
+  
+  for (let i = 0; i <= pointsCount; i++) {
+    const time = (duration / pointsCount) * i;
+    const remaining = personas.filter(p => p.skipped_at === null || p.skipped_at > time).length;
+    const retentionPct = (remaining / personas.length) * 100;
+    dataPoints.push({ time: Math.round(time * 10) / 10, pct: Math.round(retentionPct) });
+  }
+  
+  const width = 500;
+  const height = 180;
+  const paddingX = 35;
+  const paddingY = 25;
+  
+  const points = dataPoints.map((d, i) => {
+    const x = paddingX + (i / pointsCount) * (width - 2 * paddingX);
+    const y = height - paddingY - (d.pct / 100) * (height - 2 * paddingY);
+    return { x, y, ...d };
+  });
+  
+  const pathD = points.reduce((acc, p, i) => {
+    if (i === 0) return `M ${p.x} ${p.y}`;
+    return `${acc} L ${p.x} ${p.y}`;
+  }, "");
+  
+  const areaD = `${pathD} L ${points[points.length - 1].x} ${height - paddingY} L ${points[0].x} ${height - paddingY} Z`;
+  
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+  
+  return (
+    <div className="bg-cream-light/30 rounded-2xl p-5 border border-gray-100/80 shadow-inner">
+      <div className="flex justify-between items-baseline mb-4">
+        <div>
+          <h4 className="text-xs font-semibold text-charcoal uppercase tracking-wider">Audience Retention Curve</h4>
+          <p className="text-[11px] text-gray-400 mt-0.5">Interactive second-by-second viewer retention</p>
+        </div>
+        <div className="h-6">
+          {hoveredPoint ? (
+            <span className="text-xs font-semibold text-burgundy bg-burgundy/5 px-2.5 py-1 rounded-md border border-burgundy/10 transition-all duration-200">
+              {hoveredPoint.time}s mark: {hoveredPoint.pct}% watching
+            </span>
+          ) : (
+            <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+              Hover graph points to details
+            </span>
+          )}
+        </div>
+      </div>
+      
+      <div className="relative">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible select-none">
+          <defs>
+            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#800020" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#800020" stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+          
+          {/* Horizontal Grid lines */}
+          {[25, 50, 75, 100].map(val => {
+            const y = height - paddingY - (val / 100) * (height - 2 * paddingY);
+            return (
+              <g key={val}>
+                <line x1={paddingX} y1={y} x2={width - paddingX} y2={y} stroke="#e5e7eb" strokeWidth={1} strokeDasharray="3 3" />
+                <text x={paddingX - 8} y={y + 3} textAnchor="end" className="text-[10px] fill-gray-400 font-medium font-sans">{val}%</text>
+              </g>
+            );
+          })}
+          
+          {/* Time label ticks */}
+          {points.map((p, i) => (
+            <text key={i} x={p.x} y={height - 5} textAnchor="middle" className="text-[10px] fill-gray-400 font-medium font-sans">
+              {p.time}s
+            </text>
+          ))}
+          
+          {/* Area under the path */}
+          <path d={areaD} fill="url(#chartGrad)" className="transition-all duration-500" />
+          
+          {/* Main line */}
+          <path d={pathD} fill="none" stroke="#800020" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+          
+          {/* Markers */}
+          {points.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={hoveredPoint?.time === p.time ? 6 : 4}
+              className="fill-white stroke-burgundy cursor-pointer transition-all duration-150 hover:scale-125"
+              strokeWidth={2}
+              onMouseEnter={() => setHoveredPoint(p)}
+              onMouseLeave={() => setHoveredPoint(null)}
+            />
+          ))}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+function ActionableAdvice({ breakdown, score }) {
+  const hookRate = breakdown.hook_rate ?? 0;
+  const completion = breakdown.completion ?? 0;
+  const social = breakdown.social_velocity ?? 0;
+  const sentiment = breakdown.sentiment ?? 0;
+
+  const recommendations = [];
+
+  // Hook Rate Rule
+  if (hookRate < 50) {
+    recommendations.push({
+      status: "critical",
+      title: "Hook is Weak (Below 50%)",
+      text: "Nearly half of your audience scrolled away in the first 5 seconds. Consider placing the stunning 'After' shot right at the start, or add eye-catching text overlays like 'Wait for the end!' or a bold salon question.",
+    });
+  } else {
+    recommendations.push({
+      status: "success",
+      title: "Strong Hook Rate!",
+      text: "You successfully captured attention in the critical opening seconds. This indicates your cover frame and initial styling are compelling.",
+    });
+  }
+
+  // Completion Rate Rule
+  if (completion < 60) {
+    recommendations.push({
+      status: "warning",
+      title: "Retention Drops Mid-Video",
+      text: "Average watch time is low. Cut out unnecessary frames, speed up transitions, and make sure background music drops or changes to keep momentum high.",
+    });
+  } else {
+    recommendations.push({
+      status: "success",
+      title: "Excellent Audience Retention",
+      text: "Viewers watched a significant portion of your reel, which signals the algorithm that your content is high-quality and satisfying.",
+    });
+  }
+
+  // Social Velocity Rule
+  if (social < 40) {
+    recommendations.push({
+      status: "warning",
+      title: "Needs Shareable Prompts",
+      text: "Few viewers shared the video. Boost shareability by adding text callouts (e.g. 'Share with someone who needs this haircut') or giving specific advice on aftercare that viewers will want to save.",
+    });
+  }
+
+  // Sentiment Rule
+  if (sentiment < 60) {
+    recommendations.push({
+      status: "warning",
+      title: "Engagement is Low",
+      text: "Viewers aren't liking the post. Try highlighting the stylist's face or reacting naturally to the final transformation to make the video feel more authentic and personable.",
+    });
+  }
+
+  return (
+    <div className="space-y-3">
+      {recommendations.map((rec, i) => (
+        <div
+          key={i}
+          className={`p-4 rounded-2xl border transition-all duration-300 ${
+            rec.status === "critical"
+              ? "bg-red-50/50 border-red-100 text-red-900"
+              : rec.status === "warning"
+              ? "bg-amber-50/50 border-amber-100 text-amber-900"
+              : "bg-teal-50/50 border-teal-100 text-teal-900"
+          }`}
+        >
+          <div className="flex gap-2.5 items-start">
+            <span className="text-base leading-none">
+              {rec.status === "critical" ? "🔴" : rec.status === "warning" ? "🟡" : "🟢"}
+            </span>
+            <div>
+              <p className="text-xs font-bold font-sans leading-none mb-1">{rec.title}</p>
+              <p className="text-xs opacity-90 leading-relaxed font-sans mt-1">{rec.text}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AudienceSegmentsMatrix({ personas }) {
+  const groups = [
+    {
+      name: "Beauty & Trend Seekers",
+      members: ["Priya", "Farah", "Meera", "Zoya"],
+      emoji: "✨",
+      color: "from-rose-500 to-pink-500",
+      bg: "bg-rose-50/30 border-rose-100",
+      text: "text-rose-900",
+      bar: "bg-rose-500",
+      description: "Interested in aesthetic details, luxury styling, and clean transformations."
+    },
+    {
+      name: "Gen-Z & Active Youth",
+      members: ["Riya", "Rohan", "Neha", "Sneha"],
+      emoji: "⚡",
+      color: "from-violet-500 to-indigo-500",
+      bg: "bg-violet-50/30 border-violet-100",
+      text: "text-violet-900",
+      bar: "bg-violet-500",
+      description: "Resonates with upbeat music, pricing info, and fast-paced trend reels."
+    },
+    {
+      name: "Professionals & Creators",
+      members: ["Kiran", "Arjun", "Vikram", "Mansi"],
+      emoji: "👔",
+      color: "from-blue-500 to-cyan-500",
+      bg: "bg-blue-50/30 border-blue-100",
+      text: "text-blue-900",
+      bar: "bg-blue-500",
+      description: "Analyzes styling techniques, products, and direct booking convenience."
+    },
+    {
+      name: "Home & Family Makers",
+      members: ["Ananya", "Divya", "Sanjay"],
+      emoji: "🏡",
+      color: "from-amber-500 to-orange-500",
+      bg: "bg-amber-50/30 border-amber-100",
+      text: "text-amber-900",
+      bar: "bg-amber-500",
+      description: "Values comfort, location accessibility, friendly vibe, and review credibility."
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {groups.map((group, index) => {
+          const groupPersonas = personas.filter(p => group.members.includes(p.name));
+          const count = groupPersonas.length;
+          if (count === 0) return null;
+
+          const avgWatch = Math.round(groupPersonas.reduce((acc, p) => acc + p.watch_through, 0) / count);
+          const likeCount = groupPersonas.filter(p => p.liked).length;
+          const likeRate = Math.round((likeCount / count) * 100);
+          const shareCount = groupPersonas.filter(p => p.shared).length;
+          const shareRate = Math.round((shareCount / count) * 100);
+
+          return (
+            <div key={index} className={`rounded-2xl border p-4 shadow-sm flex flex-col justify-between ${group.bg}`}>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">{group.emoji}</span>
+                  <span className={`font-bold text-sm ${group.text}`}>{group.name}</span>
+                </div>
+                <p className="text-[11px] text-gray-500 leading-relaxed mb-4">{group.description}</p>
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-gray-100">
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-500 font-medium">Watch-through</span>
+                    <span className="font-bold text-charcoal">{avgWatch}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200/50 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full ${group.bar}`} style={{ width: `${avgWatch}%` }} />
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center text-xs pt-1 text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <span className="text-rose-500 font-bold">♥</span> {likeRate}% Likes
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="text-violet-500 font-bold">↗</span> {shareRate}% Shares
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function ViralityDashboard() {
   const { videoId } = useParams();
   const navigate = useNavigate();
@@ -303,6 +601,7 @@ export default function ViralityDashboard() {
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState("");
   const [barsVisible, setBarsVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const resultsRef = useRef(null);
 
   useEffect(() => {
@@ -424,35 +723,106 @@ export default function ViralityDashboard() {
               </div>
             </div>
 
-            {/* Panel 1 — Score Breakdown */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
-              <h3 className="text-sm font-semibold text-charcoal mb-4">Score Breakdown</h3>
-              <BreakdownBars breakdown={data?.breakdown ?? {}} animate={barsVisible} />
+            {/* Tab navigation */}
+            <div className="flex border border-gray-100/80 p-1 bg-white rounded-2xl shadow-sm gap-1">
+              {[
+                { id: "overview", label: "Overview", emoji: "📊" },
+                { id: "retention", label: "Retention Curve", emoji: "📈" },
+                { id: "audience", label: "Audience Segments", emoji: "👥" }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  type="button"
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-semibold rounded-xl transition-all duration-300 ${
+                    activeTab === tab.id
+                      ? "bg-burgundy text-white shadow-md shadow-burgundy/10 scale-[1.02]"
+                      : "text-gray-400 hover:text-charcoal hover:bg-gray-50"
+                  }`}
+                >
+                  <span>{tab.emoji}</span>
+                  {tab.label}
+                </button>
+              ))}
             </div>
 
-            {/* Panel 2 — Persona Cards */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
-              <h3 className="text-sm font-semibold text-charcoal mb-4">
-                Audience Reactions
-                <span className="font-normal text-gray-400 ml-2">· Comments stream in</span>
-              </h3>
-              <div className="space-y-3">
-                {(data?.personas ?? []).map((p, i) => (
-                  <PersonaCard
-                    key={p.name}
-                    persona={p}
-                    showComment={!!visibleComments[p.name]}
-                    index={i}
-                  />
-                ))}
+            {activeTab === "overview" && (
+              <div className="space-y-5 animate-fadeIn">
+                {/* KPI Metrics Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { label: "Avg Watch Time", value: `${(data?.breakdown?.completion ?? 0).toFixed(0)}%`, emoji: "⏱️", color: "bg-amber-50 text-amber-700 border-amber-100/70" },
+                    { label: "Like Rate", value: `${(data?.breakdown?.sentiment ?? 0).toFixed(0)}%`, emoji: "❤️", color: "bg-rose-50 text-rose-700 border-rose-100/70" },
+                    { label: "Share Rate", value: `${(data?.breakdown?.social_velocity ?? 0).toFixed(0)}%`, emoji: "↗️", color: "bg-violet-50 text-violet-700 border-violet-100/70" },
+                    { label: "Hook Rate", value: `${(data?.breakdown?.hook_rate ?? 0).toFixed(0)}%`, emoji: "🧲", color: "bg-teal-50 text-teal-700 border-teal-100/70" },
+                  ].map((kpi, i) => (
+                    <div key={i} className={`p-3.5 rounded-2xl border ${kpi.color} flex flex-col justify-between h-24 shadow-sm`}>
+                      <div className="flex justify-between items-start">
+                        <span className="text-lg leading-none">{kpi.emoji}</span>
+                        <span className="text-[9px] uppercase font-bold tracking-wider opacity-75">{kpi.label}</span>
+                      </div>
+                      <span className="text-xl font-bold font-sans mt-2">{kpi.value}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Score Breakdown progress bars */}
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold text-charcoal mb-4 font-display">Score Breakdown</h3>
+                  <BreakdownBars breakdown={data?.breakdown ?? {}} animate={barsVisible} />
+                </div>
+
+                {/* AI Actionable Recommendations */}
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold text-charcoal mb-4 font-display">AI Actionable Recommendations</h3>
+                  <ActionableAdvice breakdown={data?.breakdown ?? {}} score={data?.virality_score ?? 0} />
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Panel 3 — Drop-off Timeline */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
-              <h3 className="text-sm font-semibold text-charcoal mb-4">Drop-off Timeline</h3>
-              <DropoffTimeline personas={data?.personas ?? []} durationSec={data?.duration_sec ?? 30} />
-            </div>
+            {activeTab === "retention" && (
+              <div className="space-y-5 animate-fadeIn">
+                {/* SVG Retention curve */}
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold text-charcoal mb-4 font-display">Audience Retention Curve</h3>
+                  <RetentionCurveChart personas={data?.personas ?? []} durationSec={data?.duration_sec ?? 30} />
+                </div>
+
+                {/* Drop-off Timeline */}
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold text-charcoal mb-4 font-display">Drop-off Timeline</h3>
+                  <DropoffTimeline personas={data?.personas ?? []} durationSec={data?.duration_sec ?? 30} />
+                </div>
+              </div>
+            )}
+
+            {activeTab === "audience" && (
+              <div className="space-y-5 animate-fadeIn">
+                {/* Demographic Audience Segments matrix */}
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold text-charcoal mb-4 font-display">Demographic Performance Matrix</h3>
+                  <AudienceSegmentsMatrix personas={data?.personas ?? []} />
+                </div>
+
+                {/* Individual persona reactions */}
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold text-charcoal mb-4 font-display">
+                    Individual Audience Reactions
+                    <span className="font-normal text-gray-400 ml-2">· Comments stream in</span>
+                  </h3>
+                  <div className="space-y-3">
+                    {(data?.personas ?? []).map((p, i) => (
+                      <PersonaCard
+                        key={p.name}
+                        persona={p}
+                        showComment={!!visibleComments[p.name]}
+                        index={i}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {error && (
               <p className="text-sm text-red-500 bg-red-50 rounded-xl px-4 py-2 text-center">{error}</p>
