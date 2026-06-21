@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./api/AuthContext";
+import { registerWakeUpListener } from "./api/axios";
 
 // Public pages
 import Landing from "./pages/Landing";
@@ -124,11 +126,61 @@ function NotFound() {
   );
 }
 
+function WakeUpOverlay() {
+  const [visible, setVisible] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(90);
+
+  useEffect(() => {
+    registerWakeUpListener((isSlow) => {
+      if (isSlow) {
+        setVisible(true);
+        setTimeLeft(90);
+      } else {
+        setVisible(false);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!visible) return;
+    if (timeLeft <= 0) return;
+    const timer = setInterval(() => {
+      setTimeLeft(t => t - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [visible, timeLeft]);
+
+  if (!visible) return null;
+
+  return (
+    <div className="fixed inset-0 bg-charcoal/80 backdrop-blur-md flex items-center justify-center z-[9999] px-5 text-center animate-fade-in" style={{ backgroundColor: "rgba(33, 33, 33, 0.8)", backdropFilter: "blur(8px)" }}>
+      <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-glass border border-white/20">
+        <div className="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90">
+            <circle cx="48" cy="48" r="40" stroke="#f3f4f6" strokeWidth="8" fill="transparent" />
+            <circle cx="48" cy="48" r="40" stroke="#800020" strokeWidth="8" fill="transparent"
+              strokeDasharray={2 * Math.PI * 40}
+              strokeDashoffset={2 * Math.PI * 40 * (1 - timeLeft / 90)}
+              className="transition-all duration-1000 ease-linear"
+            />
+          </svg>
+          <span className="absolute text-xl font-bold text-charcoal">{timeLeft}s</span>
+        </div>
+        <h3 className="font-display text-lg text-charcoal mb-2 font-semibold">Backend is waking up</h3>
+        <p className="text-gray-400 text-xs leading-relaxed">
+          Render's free tier sleeps when inactive. Please hold while we spin up the backend server (takes up to 90 seconds).
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <AppRoutes />
+        <WakeUpOverlay />
       </AuthProvider>
     </BrowserRouter>
   );

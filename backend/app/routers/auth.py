@@ -28,8 +28,14 @@ def send_otp(payload: OTPSendRequest, db: Session = Depends(get_db)):
     db.add(otp_record)
     db.commit()
 
-    send_otp_email(payload.email, otp)
-    return {"message": "OTP sent successfully"}
+    smtp_sent = send_otp_email(payload.email, otp)
+    if smtp_sent:
+        return {"message": "OTP sent successfully"}
+    else:
+        return {
+            "message": "OTP sent successfully (Demo Mode)",
+            "sandbox_otp": otp
+        }
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)

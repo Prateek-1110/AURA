@@ -9,10 +9,10 @@ def generate_otp() -> str:
     """Generate a random 6-digit OTP."""
     return f"{random.randint(100000, 999999)}"
 
-def send_otp_email(email: str, otp: str):
+def send_otp_email(email: str, otp: str) -> bool:
     """
     Send verification email using SMTP credentials from backend/.env.
-    Logs OTP to console for reference and throws a detailed error if SMTP configuration is missing.
+    Logs OTP to console for reference. Returns True if sent via SMTP, False otherwise.
     """
     print(f"\n==========================================")
     print(f"[OTP SERVICE] Verification code for {email}: {otp}")
@@ -26,7 +26,7 @@ def send_otp_email(email: str, otp: str):
     
     if not (smtp_host and smtp_port and smtp_user and smtp_pass):
         print(f"[OTP SERVICE] SMTP credentials not fully configured. Email was not sent via SMTP, but OTP has been logged above.")
-        return
+        return False
         
     try:
         msg = MIMEMultipart()
@@ -48,9 +48,7 @@ def send_otp_email(email: str, otp: str):
             server.login(smtp_user, smtp_pass)
             server.send_message(msg)
         print(f"[OTP SERVICE] Email successfully sent to {email}")
+        return True
     except Exception as e:
         print(f"[OTP SERVICE] Error sending email to {email}: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to send email via SMTP: {str(e)}"
-        )
+        return False

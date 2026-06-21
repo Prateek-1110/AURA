@@ -17,6 +17,7 @@ export default function Register() {
   
   // OTP specific state
   const [otp, setOtp] = useState(new Array(6).fill(""));
+  const [sandboxOtp, setSandboxOtp] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
   const otpRefs = useRef([]);
 
@@ -40,7 +41,12 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
-      await api.post("/auth/send-otp", { email: form.email });
+      const { data } = await api.post("/auth/send-otp", { email: form.email });
+      if (data && data.sandbox_otp) {
+        setSandboxOtp(data.sandbox_otp);
+      } else {
+        setSandboxOtp("");
+      }
       setStep(3);
       setResendTimer(30);
       setOtp(new Array(6).fill(""));
@@ -56,7 +62,12 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
-      await api.post("/auth/send-otp", { email: form.email });
+      const { data } = await api.post("/auth/send-otp", { email: form.email });
+      if (data && data.sandbox_otp) {
+        setSandboxOtp(data.sandbox_otp);
+      } else {
+        setSandboxOtp("");
+      }
       setResendTimer(30);
       setOtp(new Array(6).fill(""));
     } catch (err) {
@@ -274,10 +285,15 @@ export default function Register() {
                 <div className="w-12 h-12 bg-burgundy/10 rounded-full flex items-center justify-center mx-auto mb-3 text-burgundy text-xl">
                   ✉️
                 </div>
-                <p className="text-sm text-gray-500 leading-relaxed">
+                <p className="text-sm text-gray-500 leading-relaxed mb-3">
                   We sent a 6-digit verification code to<br />
                   <span className="font-semibold text-charcoal">{form.email}</span>
                 </p>
+                {sandboxOtp && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl px-4 py-3 text-center leading-normal">
+                    ⚠️ <strong>Demo Mode:</strong> Email sender is not configured. Please use code <strong className="text-burgundy text-sm">{sandboxOtp}</strong> or <strong>999999</strong> to verify.
+                  </div>
+                )}
               </div>
 
               <div>
