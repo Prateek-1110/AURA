@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://aura-w5b0.onrender.com/:path*"
+    },
+    {
+      "source": "/static/:path*",
+      "destination": "https://aura-w5b0.onrender.com/static/:path*"
+    }
+  ]
+}
