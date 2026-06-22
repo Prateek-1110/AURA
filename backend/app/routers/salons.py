@@ -47,13 +47,14 @@ def _review_dict(r: Review) -> dict:
 def list_salons(
     city: str = Query(None, description="Filter by city (partial match)"),
     service: str = Query(None, description="Filter by service type (partial match)"),
+    q: str = Query(None, description="General search query (name, area, services)"),
     db: Session = Depends(get_db),
 ):
     """
     GET /salons
     GET /salons?city=bangalore
     GET /salons?service=balayage
-    GET /salons?city=bangalore&service=curly
+    GET /salons?q=luminary
     """
     query = db.query(Salon)
 
@@ -74,6 +75,34 @@ def list_salons(
         )
         id_list = [r[0] for r in rows]
         query = query.filter(Salon.id.in_(id_list))
+
+    if q:
+        search_terms = f"%{q}%"
+        # Find salon IDs that have matching transformations
+        t_rows = (
+            db.query(Transformation.salon_id)
+            .filter(
+                or_(
+                    Transformation.service_type.ilike(search_terms),
+                    Transformation.hair_texture_tag.ilike(search_terms),
+                    Transformation.style_description.ilike(search_terms),
+                    Transformation.artist_name.ilike(search_terms),
+                )
+            )
+            .distinct()
+            .all()
+        )
+        t_salon_ids = [r[0] for r in t_rows]
+
+        query = query.filter(
+            or_(
+                Salon.name.ilike(search_terms),
+                Salon.description.ilike(search_terms),
+                Salon.city.ilike(search_terms),
+                Salon.neighborhood.ilike(search_terms),
+                Salon.id.in_(t_salon_ids),
+            )
+        )
 
     salons = query.order_by(Salon.id).all()
 

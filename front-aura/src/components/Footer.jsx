@@ -30,9 +30,9 @@ export default function Footer() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Company</p>
             <div className="space-y-2">
-              <span className="block text-sm text-gray-300">About</span>
-              <span className="block text-sm text-gray-300">Privacy</span>
-              <span className="block text-sm text-gray-300">Terms</span>
+              <Link to="/about" className="block text-sm text-gray-300 hover:text-white transition">About</Link>
+              <Link to="/privacy" className="block text-sm text-gray-300 hover:text-white transition">Privacy</Link>
+              <Link to="/terms" className="block text-sm text-gray-300 hover:text-white transition">Terms</Link>
             </div>
           </div>
         </div>

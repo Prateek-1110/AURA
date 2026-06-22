@@ -10,6 +10,7 @@ import Register from "./pages/Register";
 import Explore from "./pages/Explore";
 import SalonProfile from "./pages/SalonProfile";
 import BookingConfirmation from "./pages/BookingConfirmation";
+import { AboutPage, PrivacyPage, TermsPage } from "./pages/CompanyPages";
 
 // Shared
 import BookingFlow from "./pages/BookingFlow";
@@ -67,6 +68,9 @@ function AppRoutes() {
       <Route path="/" element={<Landing />} />
       <Route path="/explore" element={<Explore />} />
       <Route path="/salon/:salonId" element={<SalonProfile />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
 
       {/* Auth */}
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
